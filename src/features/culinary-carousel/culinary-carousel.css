@@ -1,0 +1,156 @@
+.culinary-hero {
+  --gutter: clamp(1.5rem, 5.5vw, 7rem);
+  --radius: min(55vw, 950px);
+  --plate: clamp(9rem, 17vw, 18rem);
+  --angle: 52deg;
+  --focus-y: 42%;
+  --focus-x: 76%;
+  position: relative;
+  height: 100svh;
+  min-height: 32rem;
+  overflow: clip;
+  isolation: isolate;
+  background: var(--color-ivory);
+  color: var(--color-forest);
+}
+.hero-header {
+  position: absolute;
+  inset: 0 var(--gutter) auto;
+  height: clamp(4rem, 10vh, 6rem);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-ivory);
+  box-shadow: 0 0 0 100vmax var(--color-ivory);
+  clip-path: inset(0 -100vmax);
+  border-bottom: 1px solid rgb(24 39 31 / .21);
+}
+.wordmark {
+  font: 600 2.5rem/1 var(--font-display);
+  letter-spacing: -.07em;
+  color: inherit;
+  text-decoration: none;
+}
+.header-right { font: italic 1.25rem var(--font-display); }
+.hero-main, .carousel-stage { position: absolute; inset: 0; }
+.carousel-stage { overflow: clip; }
+.orbit-track, .orbit {
+  position: absolute;
+  width: calc(2 * var(--radius));
+  aspect-ratio: 1;
+  /* Place the orbit by its selected plate, even as the wheel changes size. */
+  left: calc(var(--focus-x) + var(--radius) * sin(var(--angle)));
+  top: calc(var(--focus-y) - var(--radius) * cos(var(--angle)));
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+.orbit-track {
+  border: clamp(24px, 3vw, 48px) solid var(--color-forest);
+  outline: 1px solid var(--color-forest);
+  outline-offset: 6px;
+}
+.orbit {
+  --orbit-rotation: 0deg;
+  transform: rotate(calc(var(--angle) + var(--orbit-rotation)));
+  pointer-events: none;
+}
+.dish-position {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--plate);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) rotate(var(--dish-angle)) translateY(var(--radius));
+}
+.dish-button {
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  cursor: pointer;
+  transform: rotate(calc(-1 * (var(--angle) + var(--orbit-rotation) + var(--dish-angle))));
+}
+.dish-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 8px rgb(24 39 31 / .16));
+  transition: scale .35s ease;
+}
+.dish-button.is-active img { scale: 1.45; }
+.dish-button:not(.is-active):is(:hover, :focus-visible) img { scale: 1.08; }
+.dish-caption {
+  position: absolute;
+  inset: 50% auto auto var(--gutter);
+  translate: 0 -45%;
+  width: 41%;
+}
+.caption-region, .ingredient-label, .scroll-cue {
+  font-size: .75rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.caption-region { display: flex; align-items: center; gap: .8rem; }
+.caption-region::before { content: ''; width: 2rem; height: 1px; background: currentColor; }
+.dish-caption h1 {
+  margin: 1rem 0 clamp(1.5rem, 4vh, 3rem);
+  font: 400 clamp(3.25rem, 6.4vw, 7rem)/.92 var(--font-display);
+  letter-spacing: -.048em;
+  text-wrap: balance;
+}
+.ingredient-list {
+  width: min(100%, 29rem);
+  margin-top: .75rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1.25rem;
+  list-style: none;
+}
+.ingredient-list li { padding: .5rem 0; border-top: 1px solid rgb(24 39 31 / .22); font-size: 1rem; }
+.hero-bottom {
+  position: absolute;
+  inset: auto var(--gutter) 4%;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.scroll-cue, .carousel-controls, .carousel-controls span { display: flex; align-items: center; gap: .65rem; }
+.scroll-cue { font-size: .7rem; }
+.carousel-controls { gap: 1rem; }
+.carousel-controls button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.carousel-controls button:enabled:hover { color: var(--color-ivory); background: var(--color-forest); }
+.carousel-controls button:disabled { opacity: .35; cursor: default; }
+.carousel-controls span { font-size: .8rem; font-variant-numeric: tabular-nums; }
+.carousel-controls i { width: 1.5rem; height: 1px; background: currentColor; opacity: .4; }
+
+@media (max-width: 680px) {
+  .culinary-hero { --radius: 85vw; --plate: clamp(5.5rem, 25vw, 10rem); --focus-x: 71%; --focus-y: 26%; min-height: 34rem; }
+  .hero-header { height: 3.75rem; }
+  .header-right { font-size: 1.05rem; }
+  .carousel-stage { bottom: 48%; }
+  .orbit, .orbit-track { top: calc(max(26svh, 8.84rem) - var(--radius) * cos(var(--angle))); }
+  .dish-caption { inset: 55% var(--gutter) auto; width: auto; translate: 0 -16%; }
+  .dish-caption h1 { font-size: clamp(2.75rem, 10vw, 4rem); margin: .65rem 0 1rem; }
+  .ingredient-list { margin-top: .45rem; }
+  .ingredient-list li { font-size: .9rem; padding: .35rem 0; }
+  .hero-bottom { justify-content: space-between; gap: .5rem; bottom: 2%; }
+}
+@media (max-width: 680px) and (max-height: 680px) {
+  .culinary-hero { --plate: 5.75rem; }
+  .dish-caption { inset-block-start: 41%; translate: none; }
+  .dish-caption h1 { font-size: 2.45rem; }
+  .carousel-stage { bottom: 59%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue { visibility: hidden; }
+}

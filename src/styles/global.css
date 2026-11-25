@@ -1,0 +1,23 @@
+@import '@fontsource/cormorant-garamond/400.css';
+@import '@fontsource/cormorant-garamond/400-italic.css';
+@import '@fontsource/cormorant-garamond/600.css';
+@import '@fontsource/manrope/400.css';
+@import '@fontsource/manrope/500.css';
+@import 'lenis/dist/lenis.css';
+@import 'tailwindcss';
+
+@theme {
+  --color-forest: #18271F;
+  --color-ivory: #F4EDE0;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Manrope', sans-serif;
+}
+:root { font-family: var(--font-sans); color: var(--color-forest); background: var(--color-ivory); font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { color: var(--color-ivory); background: var(--color-forest); }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
