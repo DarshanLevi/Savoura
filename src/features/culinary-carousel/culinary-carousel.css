@@ -13,26 +13,6 @@
   background: var(--color-ivory);
   color: var(--color-forest);
 }
-.hero-header {
-  position: absolute;
-  inset: 0 var(--gutter) auto;
-  height: clamp(4rem, 10vh, 6rem);
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--color-ivory);
-  box-shadow: 0 0 0 100vmax var(--color-ivory);
-  clip-path: inset(0 -100vmax);
-  border-bottom: 1px solid rgb(24 39 31 / .21);
-}
-.wordmark {
-  font: 600 2.5rem/1 var(--font-display);
-  letter-spacing: -.07em;
-  color: inherit;
-  text-decoration: none;
-}
-.header-right { font: italic 1.25rem var(--font-display); }
 .hero-main, .carousel-stage { position: absolute; inset: 0; }
 .carousel-stage { overflow: clip; }
 .orbit-track, .orbit {
@@ -81,13 +61,20 @@
 }
 .dish-button.is-active img { scale: 1.45; }
 .dish-button:not(.is-active):is(:hover, :focus-visible) img { scale: 1.08; }
+.hero-wordmark {
+  position: absolute;
+  inset: clamp(1rem, 5svh, 3rem) auto auto var(--gutter);
+  font: 600 clamp(1.8rem, 3vw, 2.75rem)/1 var(--font-display);
+  letter-spacing: -.06em;
+  pointer-events: none;
+}
 .dish-caption {
   position: absolute;
   inset: 50% auto auto var(--gutter);
   translate: 0 -45%;
   width: 41%;
 }
-.caption-region, .ingredient-label, .scroll-cue {
+.caption-region, .ingredient-label {
   font-size: .75rem;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -116,8 +103,7 @@
   align-items: center;
   gap: 2rem;
 }
-.scroll-cue, .carousel-controls, .carousel-controls span { display: flex; align-items: center; gap: .65rem; }
-.scroll-cue { font-size: .7rem; }
+.carousel-controls, .carousel-controls span { display: flex; align-items: center; gap: .65rem; }
 .carousel-controls { gap: 1rem; }
 .carousel-controls button {
   display: grid;
@@ -135,8 +121,6 @@
 
 @media (max-width: 680px) {
   .culinary-hero { --radius: 85vw; --plate: clamp(5.5rem, 25vw, 10rem); --focus-x: 71%; --focus-y: 26%; min-height: 34rem; }
-  .hero-header { height: 3.75rem; }
-  .header-right { font-size: 1.05rem; }
   .carousel-stage { bottom: 48%; }
   .orbit, .orbit-track { top: calc(max(26svh, 8.84rem) - var(--radius) * cos(var(--angle))); }
   .dish-caption { inset: 55% var(--gutter) auto; width: auto; translate: 0 -16%; }
@@ -151,6 +135,33 @@
   .dish-caption h1 { font-size: 2.45rem; }
   .carousel-stage { bottom: 59%; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .scroll-cue { visibility: hidden; }
+
+.atlas-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  min-height: 44px;
+  padding: .65rem 1.2rem;
+  border-radius: 2rem;
+  color: var(--color-ivory);
+  background: var(--color-forest);
+  box-shadow: 0 3px 0 rgb(24 39 31 / .25);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .2s, box-shadow .2s;
+}
+.atlas-trigger:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgb(24 39 31 / .22); }
+.atlas-trigger:active { transform: translateY(2px); box-shadow: none; }
+@media (max-width: 680px) {
+  .atlas-trigger { padding-inline: .9rem; font-size: .875rem; }
+  .carousel-controls { gap: .5rem; }
+}
+
+.hero-wordmark, .dish-caption, .hero-bottom {
+  transition: opacity .25s cubic-bezier(.4, 0, .2, 1);
+}
+.culinary-hero:has(.atlas[open]) :is(.hero-wordmark, .dish-caption, .hero-bottom) {
+  opacity: 0;
+  pointer-events: none;
 }
