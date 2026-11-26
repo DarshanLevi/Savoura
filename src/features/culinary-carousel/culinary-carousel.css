@@ -1,5 +1,6 @@
 .culinary-hero {
   --gutter: clamp(1.5rem, 5.5vw, 7rem);
+  --dish-progress: .0714286;
   --radius: min(55vw, 950px);
   --plate: clamp(9rem, 17vw, 18rem);
   --angle: 52deg;
@@ -24,6 +25,24 @@
   top: calc(var(--focus-y) - var(--radius) * cos(var(--angle)));
   border-radius: 50%;
   translate: -50% -50%;
+}
+.orbit-progress {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.orbit-progress path {
+  fill: none;
+  stroke: var(--color-forest);
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+.orbit-progress-track { opacity: .1; }
+.orbit-progress-fill {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: calc(1 - var(--dish-progress));
 }
 .orbit-track {
   border: clamp(24px, 3vw, 48px) solid var(--color-forest);
@@ -64,8 +83,8 @@
 .hero-wordmark {
   position: absolute;
   inset: clamp(1rem, 5svh, 3rem) auto auto var(--gutter);
-  font: 600 clamp(1.8rem, 3vw, 2.75rem)/1 var(--font-display);
-  letter-spacing: -.06em;
+  width: clamp(12rem, 20vw, 17rem);
+  height: auto;
   pointer-events: none;
 }
 .dish-caption {
@@ -95,7 +114,26 @@
   column-gap: 1.25rem;
   list-style: none;
 }
-.ingredient-list li { padding: .5rem 0; border-top: 1px solid rgb(24 39 31 / .22); font-size: 1rem; }
+.ingredient-list li { position: relative; padding: .5rem 0; font-size: 1rem; }
+.ingredient-list li::before { content: ''; position: absolute; inset: 0 0 auto; height: 1px; background: rgb(24 39 31 / .22); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .dish-caption-content h1 { animation: dish-title-in .22s ease-out both; }
+  .dish-caption-content .caption-region::before,
+  .dish-caption-content .ingredient-list li::before {
+    transform-origin: left;
+    animation: dish-line-in .35s ease-out .1s both;
+  }
+  .dish-caption-content .caption-region span,
+  .dish-caption-content .ingredient-label,
+  .dish-caption-content .ingredient-list li span {
+    display: inline-block;
+    animation: dish-detail-in .35s ease-out .25s both;
+  }
+}
+@keyframes dish-title-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes dish-line-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes dish-detail-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 .hero-bottom {
   position: absolute;
   inset: auto var(--gutter) 4%;
@@ -139,29 +177,64 @@
 .atlas-trigger {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: .65rem;
+  gap: .625rem;
   min-height: 44px;
-  padding: .65rem 1.2rem;
+  padding: .45rem 1.1rem .45rem .55rem;
   border-radius: 2rem;
   color: var(--color-ivory);
   background: var(--color-forest);
-  box-shadow: 0 3px 0 rgb(24 39 31 / .25);
+  box-shadow: 0 4px 10px rgb(24 39 31 / .14);
+  font-size: .875rem;
+  font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
-  transition: transform .2s, box-shadow .2s;
+  transition: transform .2s ease, background-color .5s ease, color .5s ease, box-shadow .5s ease;
 }
-.atlas-trigger:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgb(24 39 31 / .22); }
-.atlas-trigger:active { transform: translateY(2px); box-shadow: none; }
+.atlas-trigger-icon {
+  width: 25px;
+  height: 25px;
+  flex: none;
+  fill: currentColor;
+  transition: transform 1.5s cubic-bezier(.22, 1, .36, 1);
+}
+.atlas-trigger:is(:hover, :focus-visible) {
+  background-color: var(--color-ivory);
+  color: var(--color-forest);
+  box-shadow: inset 0 0 0 1px var(--color-forest);
+}
+.atlas-trigger:is(:hover, :focus-visible) .atlas-trigger-icon { transform: rotate(250deg); }
+.atlas-trigger:active { transform: scale(.97); }
 @media (max-width: 680px) {
-  .atlas-trigger { padding-inline: .9rem; font-size: .875rem; }
   .carousel-controls { gap: .5rem; }
 }
 
-.hero-wordmark, .dish-caption, .hero-bottom {
+.hero-wordmark, .dish-caption, .hero-bottom, .next-section-button {
   transition: opacity .25s cubic-bezier(.4, 0, .2, 1);
 }
-.culinary-hero:has(.atlas[open]) :is(.hero-wordmark, .dish-caption, .hero-bottom) {
+.culinary-hero:has(.atlas[open]) :is(.hero-wordmark, .dish-caption, .hero-bottom, .next-section-button) {
   opacity: 0;
   pointer-events: none;
+}
+
+.next-section-button {
+  position: fixed;
+  left: 50%;
+  translate: -50% 0;
+  bottom: 4%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 1px solid rgb(24 39 31 / .3);
+  border-radius: 50%;
+  background: rgb(244 237 224 / .5);
+  color: var(--color-forest);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 5px 18px rgb(24 39 31 / .12), inset 0 1px 0 rgb(244 237 224 / .8);
+  cursor: pointer;
+  transition: transform .35s ease, background .35s ease, opacity .25s ease;
+}
+.next-section-button:hover { transform: translateY(4px); background: rgb(244 237 224 / .8); }
+@media (max-width: 680px) {
+  .next-section-button { width: 2.75rem; height: 2.75rem; bottom: 9%; }
 }

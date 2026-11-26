@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useContext, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
-import { ArrowLeft, ArrowRight, Map as MapIcon } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { gsap, ScrollTrigger } from '../../lib/animation/gsap'
 import { dishes } from './dishes'
@@ -12,10 +13,13 @@ const step = 360 / dishes.length
 
 export function CulinaryCarousel() {
   const sectionRef = useRef<HTMLElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [progressArc, setProgressArc] = useState('')
   const orbitRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<ScrollTrigger | null>(null)
   const activeRef = useRef(0)
   const [active, setActive] = useState(0)
+  const [heroVisible, setHeroVisible] = useState(true)
   const [detail, setDetail] = useState<number | null>(null)
   const [mapStart, setMapStart] = useState<number | null>(null)
   const mapOpen = useRef(false)
@@ -26,6 +30,7 @@ export function CulinaryCarousel() {
 
   const updateOrbit = useCallback((position: number) => {
     positionRef.current.value = position
+    sectionRef.current?.style.setProperty('--dish-progress', String((position + 1) / dishes.length))
     orbitRef.current?.style.setProperty('--orbit-rotation', `${-position * step}deg`)
     const next = Math.max(0, Math.min(dishes.length - 1, Math.round(position)))
     if (activeRef.current !== next) {
@@ -59,6 +64,40 @@ export function CulinaryCarousel() {
   }, [reducedMotion, updateOrbit])
 
   useLayoutEffect(() => () => { tween.current?.kill() }, [reducedMotion])
+
+  useLayoutEffect(() => {
+    const track = trackRef.current
+    const stage = track?.parentElement
+    if (!track || !stage) return
+
+    function fitProgressArc() {
+      if (!track || !stage) return
+      const bounds = stage.getBoundingClientRect()
+      const circle = track.getBoundingClientRect()
+      const outerRadius = circle.width / 2
+      const x = circle.left - bounds.left + outerRadius
+      const y = circle.top - bounds.top + outerRadius
+      const radius = Math.max(outerRadius * .69, Math.hypot(bounds.width - x, y) + 12)
+      const rightY = y + Math.sqrt(radius ** 2 - (bounds.width - x) ** 2)
+      const topX = x - Math.sqrt(radius ** 2 - y ** 2)
+      setProgressArc(`M ${bounds.width} ${rightY} A ${radius} ${radius} 0 0 1 ${topX} 0`)
+    }
+
+    fitProgressArc()
+    const observer = new ResizeObserver(fitProgressArc)
+    observer.observe(stage)
+    observer.observe(track)
+    return () => observer.disconnect()
+  }, [])
+
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+    const observer = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), { threshold: 0.01 })
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
 
   const goTo = (index: number) => {
     const next = Math.max(0, Math.min(dishes.length - 1, index))
@@ -98,13 +137,29 @@ export function CulinaryCarousel() {
     setMapStart(null)
   }
 
+  function scrollToNext(revealHalf: boolean) {
+    const nextSection = document.getElementById('next-section')
+    if (!nextSection) return
+    const target = nextSection.getBoundingClientRect().top + window.scrollY
+      - (revealHalf ? window.innerHeight / 2 : 0)
+    if (scroll?.current) {
+      scroll.current.scrollTo(target, { duration: 1.5, easing: (progress) => 1 - Math.pow(1 - progress, 3) })
+    } else {
+      window.scrollTo({ top: target, behavior: reducedMotion ? 'instant' : 'smooth' })
+    }
+  }
+
   const shown = dishes[detail ?? active]
 
   return (
     <section className="culinary-hero" ref={sectionRef} aria-label="Explore regional Indian dishes">
       <main className="hero-main" id="top">
         <div className="carousel-stage" aria-label="Regional dishes carousel">
-          <div className="orbit-track" aria-hidden="true"><div /></div>
+          <svg className="orbit-progress" aria-hidden="true">
+            <path className="orbit-progress-track" d={progressArc} pathLength="1" />
+            <path className="orbit-progress-fill" d={progressArc} pathLength="1" />
+          </svg>
+          <div className="orbit-track" ref={trackRef} aria-hidden="true"><div /></div>
           <div className="orbit" ref={orbitRef}>
             {dishes.map((dish, index) => {
               return (
@@ -128,15 +183,17 @@ export function CulinaryCarousel() {
           </div>
         </div>
 
-        <p className="hero-wordmark">savoura.</p>
+        <img className="hero-wordmark" src="/savoura-logo.png" alt="Savoura" />
 
         <div className="dish-caption" aria-live="polite" aria-atomic="true">
-          <p className="caption-region">A taste of {shown.region}</p>
-          <h1>{shown.name}</h1>
-          <p className="ingredient-label" id="ingredient-label">Main ingredients</p>
-          <ul className="ingredient-list" aria-labelledby="ingredient-label">
-            {shown.ingredients.map(ingredient => <li key={ingredient}>{ingredient}</li>)}
-          </ul>
+          <div className="dish-caption-content" key={shown.name}>
+            <p className="caption-region"><span>A taste of {shown.region}</span></p>
+            <h1>{shown.name}</h1>
+            <p className="ingredient-label" id="ingredient-label">Main ingredients</p>
+            <ul className="ingredient-list" aria-labelledby="ingredient-label">
+              {shown.ingredients.map(ingredient => <li key={ingredient}><span>{ingredient}</span></li>)}
+            </ul>
+          </div>
         </div>
 
         <div className="hero-bottom">
@@ -145,11 +202,28 @@ export function CulinaryCarousel() {
             <span><strong>{String(active + 1).padStart(2, '0')}</strong><i />{String(dishes.length).padStart(2, '0')}</span>
             <button type="button" onClick={() => goTo(active + 1)} disabled={active === dishes.length - 1} aria-label="Next dish"><ArrowRight size={17} strokeWidth={1.4} /></button>
           </div>
-          <button className="atlas-trigger" type="button" aria-haspopup="dialog" aria-expanded={mapStart !== null} onClick={openMap}>
-            <MapIcon size={18} strokeWidth={1.5} /> India map
+          <button className="atlas-trigger" type="button" aria-label="Explore the India map" aria-haspopup="dialog" aria-expanded={mapStart !== null} onClick={openMap}>
+            <svg className="atlas-trigger-icon" viewBox="0 0 512 512" aria-hidden="true">
+              <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm50.7-186.9L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
+            </svg>
+            Explore
           </button>
         </div>
       </main>
+      {heroVisible && mapStart === null && createPortal(
+        <button
+          className="next-section-button"
+          type="button"
+          aria-label="Continue to the next section"
+          onPointerEnter={(event) => {
+            if (event.pointerType === 'mouse' && !reducedMotion) scrollToNext(true)
+          }}
+          onClick={() => scrollToNext(false)}
+        >
+          <ArrowDown size={22} strokeWidth={1.5} />
+        </button>,
+        document.body,
+      )}
       {mapStart !== null && <Suspense fallback={null}>
         <IndiaMap initial={mapStart} onPreview={previewDish} onFinish={finishMap} />
       </Suspense>}
