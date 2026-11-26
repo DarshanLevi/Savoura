@@ -13,6 +13,19 @@
   --font-sans: 'Manrope', sans-serif;
 }
 :root { font-family: var(--font-sans); color: var(--color-forest); background: var(--color-ivory); font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-forest) transparent;
+}
+@supports selector(::-webkit-scrollbar) {
+  html { scrollbar-width: auto; scrollbar-color: auto; }
+  html::-webkit-scrollbar { width: 5px; height: 5px; }
+  html::-webkit-scrollbar-track { background: transparent; }
+  html::-webkit-scrollbar-thumb {
+    background: var(--color-forest);
+    border-radius: 999px;
+  }
+}
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -20,4 +33,50 @@ button, a { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+.page-scroll-handle { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  html:has(.page-scroll-handle:not([hidden])) { scrollbar-width: none; }
+  html:has(.page-scroll-handle:not([hidden]))::-webkit-scrollbar { display: none; }
+
+  .page-scroll-handle:not([hidden]) {
+    --handle-halo:
+      0 0 0 6px rgb(255 255 255 / .42),
+      0 0 0 7px rgb(24 39 31 / .28),
+      0 0 11px 7px rgb(244 237 224 / .55),
+      0 0 16px 8px rgb(24 39 31 / .22);
+    position: fixed;
+    z-index: 4;
+    inset: .375rem -5px .375rem auto;
+    display: block;
+    width: 22px;
+    height: calc(100dvh - .75rem);
+    margin: 0;
+    appearance: none;
+    writing-mode: vertical-lr;
+    direction: ltr;
+    background: transparent;
+    cursor: ns-resize;
+  }
+  .page-scroll-handle::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 24px;
+    border: 1px solid var(--color-ivory);
+    border-right: 0;
+    border-radius: 999px 0 0 999px;
+    background: var(--color-forest);
+    box-shadow: var(--handle-halo);
+  }
+  .page-scroll-handle::-moz-range-thumb {
+    width: 12px;
+    height: 24px;
+    border: 1px solid var(--color-ivory);
+    border-right: 0;
+    border-radius: 999px 0 0 999px;
+    background: var(--color-forest);
+    box-shadow: var(--handle-halo);
+  }
+  .page-scroll-handle:focus-visible { outline-offset: -2px; }
 }

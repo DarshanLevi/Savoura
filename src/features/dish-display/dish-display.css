@@ -1,0 +1,161 @@
+.dish-display {
+  background: var(--color-forest);
+  color: var(--color-ivory);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dish-display { height: 545svh; display: flex; flex-direction: column; }
+  .dish-display-stage { position: sticky; top: 0; }
+  .dish-display-brand { position: sticky; bottom: 0; margin-top: auto; visibility: hidden; opacity: 0; pointer-events: none; }
+}
+
+.dish-display-brand {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+}
+.dish-display-brand img {
+  --dock: 0;
+  --corner-x: clamp(1.5rem, 5.5vw, 7rem);
+  --corner-y: clamp(1rem, 5svh, 3rem);
+  --center-width: min(52vw, 50svh, 28rem);
+  --corner-width: clamp(12rem, 20vw, 17rem);
+  position: absolute;
+  left: calc(50% + (var(--corner-x) - 50%) * var(--dock));
+  top: calc(50% + (var(--corner-y) - 50%) * var(--dock));
+  width: calc(var(--center-width) + (var(--corner-width) - var(--center-width)) * var(--dock));
+  translate: calc(-50% + 50% * var(--dock)) calc(-50% + 50% * var(--dock));
+}
+@media (prefers-reduced-motion: reduce) {
+  .dish-display-brand { position: relative; background: var(--color-ivory); }
+  .dish-display-brand img { --dock: 1; }
+}
+.dish-display-stage {
+  background: var(--color-forest);
+  overflow: clip;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: min(5svh, 2rem) 1rem;
+}
+
+.dish-display-figure {
+  position: relative;
+  width: min(94vw, 132svh, 79rem);
+  aspect-ratio: 1000 / 664;
+  display: grid;
+  place-items: center;
+  margin: 0;
+}
+
+.dish-display-serving { position: relative; width: 47%; }
+.dish-display-contact-shadow {
+  position: absolute;
+  left: 48%;
+  top: 90%;
+  width: 13%;
+  height: 7%;
+  border-radius: 50%;
+  background: rgb(24 39 31 / .32);
+  filter: blur(7px);
+  pointer-events: none;
+}
+.dish-display-hand {
+  position: absolute;
+  width: 66%;
+  left: 30%;
+  top: 69%;
+  filter: brightness(.88) contrast(.94);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dish-display-hand, .dish-display-contact-shadow { display: none; }
+}
+
+.dish-display-plate {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: clip;
+  background: url("/ceramic-plate.png") 43% 49% / 120% 120% no-repeat;
+}
+
+.dish-display-frames {
+  position: absolute;
+  inset: 6%;
+  display: flex;
+  container-type: inline-size;
+  overflow: clip;
+  border-radius: 50%;
+  isolation: isolate;
+}
+
+.dish-display-cut {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: flex-grow 420ms cubic-bezier(.22,.68,.24,1);
+}
+
+.dish-display-cut img {
+  position: absolute;
+  top: 50%;
+  left: var(--cut-position);
+  width: 160cqw;
+  height: 160%;
+  max-width: none;
+  transform: translate(calc(-1 * var(--cut-position)), -50%);
+  pointer-events: none;
+}
+
+.dish-display-cut:nth-child(2) img {
+  translate: -25cqw 0;
+}
+.dish-display-cut:first-child img {
+  left: 50%;
+  transform: translate(-35%, -50%);
+}
+.dish-display-cut:last-child img {
+  left: 50%;
+  transform: translate(-65%, -50%);
+}
+
+.dish-display-cut[data-active='true'] { flex-grow: 2.35; }
+.dish-display-cut:focus-visible { outline-offset: -3px; color: var(--color-forest); }
+
+.plate-lettering {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 17;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.plate-lettering .india-saffron { stroke: #d99460; }
+.plate-lettering .india-green { stroke: #87a689; }
+
+.plate-lettering g {
+  transition: translate 360ms ease;
+}
+.dish-display-figure:has([data-active='true']) .plate-lettering g:first-child { translate: 0 -2px; }
+.dish-display-figure:has([data-active='true']) .plate-lettering g:last-child { translate: 0 2px; }
+
+@media (max-width: 600px) {
+  .dish-display-figure { aspect-ratio: 680 / 664; }
+  .dish-display-serving { width: 69.12%; }
+  .plate-lettering-compact { stroke-width: 12; }
+  .plate-lettering-wide { display: none; }
+}
+@media (min-width: 601px) {
+  .plate-lettering-compact { display: none; }
+}
